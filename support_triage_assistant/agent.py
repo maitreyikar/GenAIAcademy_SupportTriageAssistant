@@ -25,7 +25,8 @@ SUPPORT_CATEGORIES = {
 
 CATEGORIZER_INSTRUCTION = f"""
 Analyze the user's PROMPT and identify the category.
-Output ONLY a JSON object in this format: {{"category": "label"}}
+Write the category to the output key.
+Do NOT return any explanation or JSON. Only store the value.
 Choose from: {list(SUPPORT_CATEGORIES.keys())}
 
 PROMPT:
@@ -50,7 +51,10 @@ Assess the priority of the PROMPT: 'low', 'medium', 'high', or 'urgent'.
 - 'low': General feedback or feature requests.
 
 Output ONLY a JSON object containing both the existing category and the new priority.
-Format: {{"category": CATEGORY, "priority": "level"}}
+Format: {{"category": "<category>", "priority": "level"}}
+
+PROMPT:
+    {{ PROMPT }}
 
 CATEGORY:
     {{ CATEGORY }}
@@ -66,11 +70,11 @@ priority_agent = Agent(
 
 triage_workflow = SequentialAgent(
     sub_agents=[categorization_agent, priority_agent],
-    name='triage_workflow',
+    name='triage_workflow'
 )
 
 root_agent = Agent(
-    name="greeter",
+    name="root",
     model='gemini-2.5-flash',
     description="The main entry point for the support triage assistant",
     instruction="""
